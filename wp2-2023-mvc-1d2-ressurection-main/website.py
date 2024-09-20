@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 import csv
 from io import StringIO
 import bcrypt
+from werkzeug.security import safe_str_cmp
 
 load_dotenv()
 
@@ -73,7 +74,8 @@ def login():
             session['is_admin'] = user[5]
             return redirect(url_for('notities'))
         else:
-            return "Login Failed"
+            flash('Ongeldige gebruikersnaam of wachtwoord.', 'foutmelding')
+            return redirect(url_for('login'))
     return render_template('Homepage.html')
 
 @app.route('/logout')
