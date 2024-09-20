@@ -1,0 +1,107 @@
+{% extends 'WebsiteBase.html' %}
+
+{% block base %}
+
+<h2>Opgeslagen Notities</h2>
+<ul>
+    <form action="/notitie_weergeven" method="get">
+        <select name="sorteer">
+            <option value="nieuw_naar_oud">Nieuw naar Oud</option>
+            <option value="oud_naar_nieuw">Oud naar Nieuw</option>
+            <option value="Categorie">Categorie</option>
+        </select>
+        <button type="submit">Filter</button>
+    </form>
+    <form action="/notitie_weergeven" method="get">
+        <input type="text" name="zoekterm" placeholder="Zoek notities...">
+        <button type="submit">Zoeken</button>
+    </form>
+
+
+    {% for notitie in notities %}
+   <div class="accordion">
+    <button class="accordion-button">
+        <strong>{{ notitie[1] }}</strong> - Categorie: {{ notitie[5] }} - Datum: {{ notitie[2] }}
+    </button>
+    <div class="panel">
+        <div class="panel-content">
+            <div>
+                Notitie: {{ notitie[3] }}<br>
+                <a href="{{ notitie[4] }}">{{ notitie[6] or notitie[4] }}</a>
+            </div>
+            <div>
+                <h4>Gegenereerde Vragen:</h4>
+                {% for vraag in notitie_vragen[notitie[0]] %}
+                    <p>{{ vraag }}</p>
+                {% endfor %}
+            </div>
+            {% if session['is_admin'] == 1 or session['teacher_id'] == notitie[7] %}
+            <div class="panel-actions">
+                <form action="/notitie_bijwerken/{{ notitie[0] }}" method="get" style="display:inline;">
+                    <input type="submit" value="Bijwerken">
+                </form>
+                <form action="/notitie_verwijderen/{{ notitie[0] }}" method="post" style="display:inline;">
+                    <input type="submit" value="Verwijder">
+                </form>
+                <form action="/vragen_verwijderen/{{ notitie[0] }}" method="post" style="display:inline;">
+                    <input type="submit" value="Verwijder vragen">
+                </form>
+                <form action="{{ url_for('export_vragen_csv', notitie_id=notitie[0]) }}" method="get">
+                    <button type="submit" class="btn btn-primary">Exporteer vragen naar CSV</button>
+                </form>
+            </div>
+            {% endif %}
+        </div>
+        <div class="vragen-generator">
+            <form action="/genereer_vragen" method="post">
+                <input type="hidden" name="notitie_id" value="{{ notitie[0] }}">
+                <h3>Genereer Vragen voor deze Notitie:</h3>
+                <input type="radio" id="meerkeuze_{{ notitie[0] }}" name="vraag_type" value="meerkeuze">
+                <label for="meerkeuze_{{ notitie[0] }}">Meerkeuzevragen</label><br>
+                <input type="radio" id="open_{{ notitie[0] }}" name="vraag_type" value="open">
+                <label for="open_{{ notitie[0] }}">Open Vragen</label><br>
+                <button type="submit">Genereer</button>
+            </form>
+            {% with messages = get_flashed_messages(category_filter=["foutmelding"]) %}
+            {% if messages %}
+            <div style="color: red;">
+                {% for message in messages %}
+                {{ message }}
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% endwith %}
+        </div>
+    </div>
+        {% endfor %}
+</ul>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var acc = document.getElementsByClassName("accordion-button");
+        var i;
+
+        for (i = 0; i < acc.length; i++) {
+            acc[i].addEventListener("click", function () {
+                this.classList.toggle("active");
+                var panel = this.nextElementSibling;
+                if (panel.style.display === "block") {
+                    panel.style.display = "none";
+                } else {
+                    panel.style.display = "block";
+                }
+            });
+        }
+    });
+</script>
+<nav>
+    <ul>
+        {% if pagina > 1 %}
+        <li><a href="{{ url_for('notitie_weergeven', pagina=pagina-1) }}">Vorige</a></li>
+        {% endif %}
+        <li>Pagina {{ pagina }} van {{ totaal_pagina }}</li>
+        {% if pagina < totaal_pagina %}
+        <li><a href="{{ url_for('notitie_weergeven', pagina=pagina+1) }}">Volgende</a></li>
+        {% endif %}
+    </ul>
+</nav>
+{% endblock %}

@@ -1,0 +1,40 @@
+{% extends 'WebsiteBase.html' %}
+
+{% block base %}
+
+
+    <div class="container">
+        <h2>Notitie Bijwerken</h2>
+
+        <form action="{{ url_for('notitie_bijwerken', notitie_id=notitie.notitie_id) }}" method="post">
+            <label for="titel">Titel:</label><br>
+            <input type="text" name="titel" value="{{ notitie.titel }}"><br>
+
+            <label for="datum">Datum:</label><br>
+            <input type="text" name="datum" value="{{ notitie.datum }}"><br>
+
+            <label for="inhoud">Inhoud:</label><br>
+            <textarea name="inhoud">{{ notitie.inhoud }}</textarea><br>
+
+            <label for="bron">Bron:</label><br>
+            <input type="text" name="bron" value="{{ notitie.bron }}"><br>
+
+            <label for="bronnaam">Bronnaam:</label><br>
+            <input type="text" name="bronnaam" value="{{ notitie.bronnaam }}"><br>
+
+            <label for="categorie">Categorie:</label><br>
+            {% for cat in ['Biologie', 'Geschiedenis', 'Wiskunde', 'Nederlands', 'Engels', 'Overig'] %}
+                <label>
+                    <input type="checkbox" name="categorie" value="{{ cat }}"
+                    {% if cat in notitie.categorie %} checked {% endif %}>
+                    {{ cat }}
+                </label><br>
+            {% endfor %}
+
+            <input type="submit" value="Bijwerken">
+            {% if bericht %}
+                <p>{{ bericht }}</p>
+            {% endif %}
+        </form>
+    </div>
+{% endblock %}

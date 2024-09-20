@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='Opmaak.css') }}">
+    <title>Title</title>
+</head>
+<nav class="nav snipcss-l546b">
+    <div class="container__large">
+        <div class="nav__inner">
+            <div class="nav__left">
+                <a href="/?hsLang=nl" class="nav__logo">
+                    <img src="https://www.test-correct.nl/hubfs/raw_assets/public/test-correct/images/testcorrect-logo.svg" class="nav__logo-large" alt="Test Correct logo">
+                </a>
+                <ul class="nav__menu">
+                    <li class="nav__menu-item menu-item menu-depth-1">
+                        <a class="nav__menu-item-link" href='/notities'>
+              <span>
+                Notities
+              </span>
+                        </a>
+                    </li>
+                    <li class="nav__menu-item menu-item menu-depth-1">
+                        <a class="nav__menu-item-link" href='/notitie_weergeven'">
+              <span>
+                Archief
+              </span>
+                        </a>
+                    </li>
+                    {% if session['is_admin'] %}
+                    <li class="nav__menu-item menu-item menu-depth-1">
+                        <a class="nav__menu-item-link" href='/admin_pagina'>
+              <span>
+                admin
+              </span>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+           <div class="nav__right">
+                {% if session['display_name'] %}
+                <strong class="user-name">{{ session['display_name'] }}</strong>
+                <a class="btn btn-logout" href="{{ url_for('logout') }}">Uitloggen</a>
+               {% endif %}
+         </div>
+        </div>
+    </div>
+</nav>
+  {% block base %}
+  {% endblock %}
+
+</body>
+</html>

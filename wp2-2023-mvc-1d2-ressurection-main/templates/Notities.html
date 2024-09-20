@@ -1,0 +1,57 @@
+{% extends 'WebsiteBase.html' %}
+
+{% block base %}
+
+    <div class="container">
+        <h2>Notities Aanmaken</h2>
+
+        <form action="/notitie_toevoegen" method="post">
+        <label for="titel">Titel:</label><br>
+        <input type="text" id="titel" name="titel" required><br>
+
+        <label for="datum">Datum:</label><br>
+        <input type="date" id="datum" name="datum" required><br>
+
+        <label for="inhoud">Inhoud:</label><br>
+        <textarea id="inhoud" name="inhoud" rows="10" cols="33" required></textarea><br>
+
+        <label for="bron">Bron:</label><br>
+        <input type="text" id="bron" name="bron"><br>
+
+        <label for="bronnaam">Bron naam:</label><br>
+        <input type="text" id="bronnaam" name="bronnaam"><br>
+
+        <label for="categorie">Categorie:</label><br>
+        <label><input type="checkbox" name="categorie" value="Biologie"> Biologie</label><br>
+        <label><input type="checkbox" name="categorie" value="Geschiedenis"> Geschiedenis</label><br>
+        <label><input type="checkbox" name="categorie" value="Wiskunde"> Wiskunde</label><br>
+        <label><input type="checkbox" name="categorie" value="Nederlands"> Nederlands</label><br>
+        <label><input type="checkbox" name="categorie" value="Engels"> Engels</label><br>
+        <label><input type="checkbox" name="categorie" value="Overig"> Overig</label><br>
+
+        <input type="submit" value="Notitie Opslaan">
+    </form>
+    </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+
+        const opgeslagenCategorieen = JSON.parse(localStorage.getItem('laatstGeselecteerdeCategorieen') || '[]');
+        opgeslagenCategorieen.forEach(function (catValue) {
+            const checkbox = document.querySelector(`input[type=checkbox][name="categorie"][value="${catValue}"]`);
+            if (checkbox) checkbox.checked = true;
+        });
+
+
+        document.querySelectorAll('input[type=checkbox][name="categorie"]').forEach(function (checkbox) {
+            checkbox.addEventListener('change', function () {
+                const geselecteerdeCategorieen = [];
+                document.querySelectorAll('input[type=checkbox][name="categorie"]:checked').forEach(function (checked) {
+                    geselecteerdeCategorieen.push(checked.value);
+                });
+                localStorage.setItem('laatstGeselecteerdeCategorieen', JSON.stringify(geselecteerdeCategorieen));
+            });
+        });
+    });
+</script>
+
+{% endblock %}

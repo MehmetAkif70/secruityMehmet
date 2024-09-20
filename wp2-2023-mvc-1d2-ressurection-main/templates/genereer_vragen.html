@@ -1,0 +1,17 @@
+{% extends 'WebsiteBase.html' %}
+
+{% block base %}
+
+<h1>Gegenereerde Vragen</h1>
+
+
+
+<ul>
+    {% for open_vraag in open_vragen %}
+    <li>{{ open_vraag }}</li>
+    {% endfor %}
+    {% for vraag_meerkeuze in vragen_meerkeuze %}
+    <li>{{ vraag_meerkeuze }}</li>
+    {% endfor %}
+</ul>
+{% endblock %}
