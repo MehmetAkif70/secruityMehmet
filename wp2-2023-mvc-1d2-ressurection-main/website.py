@@ -321,17 +321,36 @@ def haal_vragen_op(notitie_id):
     vragen = cursor.fetchall()
     return [vraag[0] for vraag in vragen]
 
+
 @app.route('/vragen_verwijderen/<int:notitie_id>', methods=['POST'])
 def vragen_verwijderen(notitie_id):
     if 'teacher_id' not in session:
         return redirect(url_for('login'))
     teacher_id = session['teacher_id']
+    is_admin = session.get('is_admin', 0)
+
     conn = sqlite3.connect('databases/testgpt.db')
     cursor = conn.cursor()
+    # Controleer of de notitie eigendom is van de gebruiker of admin
+    cursor.execute('SELECT teacher_id FROM notities WHERE notitie_id = ?', (notitie_id,))
+    notitie = cursor.fetchone()
+    if not notitie:
+        conn.close()
+        flash('Notitie niet gevonden.', 'foutmelding')
+        return redirect(url_for('notitie_weergeven'))
+
+    notitie_teacher_id = notitie[0]
+    if notitie_teacher_id != teacher_id and not is_admin:
+        conn.close()
+        flash('Je hebt geen toestemming om de vragen van deze notitie te verwijderen.', 'foutmelding')
+        return redirect(url_for('notitie_weergeven'))
+
     cursor.execute('DELETE FROM vragen WHERE notitie_id = ?', (notitie_id,))
     conn.commit()
     conn.close()
+    flash('Vragen succesvol verwijderd.')
     return redirect(url_for('notitie_weergeven'))
+
 
 @app.route('/export_vragen_csv/<int:notitie_id>')
 def export_vragen_csv(notitie_id):
