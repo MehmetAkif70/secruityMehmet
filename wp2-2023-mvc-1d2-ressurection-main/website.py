@@ -6,6 +6,7 @@ from lib.testgpt.testgpt import TestGPT
 from dotenv import load_dotenv
 import csv
 from io import StringIO
+import bcrypt
 
 load_dotenv()
 
@@ -44,8 +45,17 @@ cursor.execute('''
 conn.commit()
 conn.close()
 
+def hash_password(plain_password):
+    salt = bcrypt.gensalt()
+    return bcrypt.hashpw(plain_password.encode('utf-8'), salt)
+
+def verify_password(stored_password, provided_password):
+    return bcrypt.checkpw(provided_password.encode('utf-8'), stored_password)
+
+
 @app.route('/')
 
+@app.route('/login', methods=['GET', 'POST'])
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -53,10 +63,10 @@ def login():
         wachtwoord = request.form['teacher_password']
         conn = sqlite3.connect('databases/testgpt.db')
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM teachers WHERE username = ? AND teacher_password = ?", (email, wachtwoord))
+        cursor.execute("SELECT * FROM teachers WHERE username = ?", (email,))
         user = cursor.fetchone()
         conn.close()
-        if user:
+        if user and verify_password(user[3], wachtwoord):
             display_name = user[1]
             session['display_name'] = display_name
             session['teacher_id'] = user[0]
@@ -113,10 +123,12 @@ def add_teacher():
         password = request.form['password']
         is_admin = 1 if request.form.get('is_admin') else 0
 
+        hashed_password = hash_password(password)
+
         conn = sqlite3.connect('databases/testgpt.db')
         cursor = conn.cursor()
         cursor.execute('INSERT INTO teachers (display_name, username, teacher_password, is_admin) VALUES (?, ?, ?, ?)',
-                       (name, email, password, is_admin))
+                       (name, email, hashed_password, is_admin))
         conn.commit()
         conn.close()
 
