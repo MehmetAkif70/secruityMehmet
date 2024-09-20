@@ -105,6 +105,7 @@ def admin_pagina():
     return render_template('admin_pagina.html', teachers=teachers)
 
 @app.route('/delete_teacher/<int:teacher_id>', methods=['POST'])
+@admin_required
 def delete_teacher(teacher_id):
     conn = sqlite3.connect('databases/testgpt.db')
     cursor = conn.cursor()
