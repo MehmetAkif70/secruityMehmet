@@ -195,24 +195,26 @@ def notitie_weergeven():
     per_pagina = 20
     conn = sqlite3.connect('databases/testgpt.db')
     cursor = conn.cursor()
-    order_by_datum = "ORDER BY datum DESC"  # Standaard sortering
-    if sorteer == 'nieuw_naar_oud':
-        order_by_datum = 'ORDER BY datum DESC'
-    elif sorteer == 'oud_naar_nieuw':
-        order_by_datum = 'ORDER BY datum ASC'
+
+    sort_options = {
+        'nieuw_naar_oud': 'datum DESC',
+        'oud_naar_nieuw': 'datum ASC'
+    }
+    order_by_datum = sort_options.get(sorteer, 'datum DESC')  # Standaard sortering
 
     zoek_query = 'WHERE teacher_id = ? AND (titel LIKE ? OR inhoud LIKE ?)'
-    zoek_params = (teacher_id, '%' + zoekterm + '%', '%' + zoekterm + '%')
+    zoek_params = [teacher_id, f'%{zoekterm}%', f'%{zoekterm}%']
     if categorie:
         zoek_query += ' AND categorie = ?'
-        zoek_params += (categorie,)
+        zoek_params.append(categorie)
 
     cursor.execute(f'SELECT COUNT(*) FROM notities {zoek_query}', zoek_params)
     totaal_items = cursor.fetchone()[0]
     totaal_pagina = (totaal_items + per_pagina - 1) // per_pagina
 
-    query = f'SELECT * FROM notities {zoek_query} {order_by_datum} LIMIT ? OFFSET ?'
-    cursor.execute(query, zoek_params + (per_pagina, (pagina - 1) * per_pagina))
+    query = f'SELECT * FROM notities {zoek_query} ORDER BY {order_by_datum} LIMIT ? OFFSET ?'
+    zoek_params.extend([per_pagina, (pagina - 1) * per_pagina])
+    cursor.execute(query, zoek_params)
     notities = cursor.fetchall()
     notitie_vragen = {}
     for notitie in notities:
